@@ -1,0 +1,18 @@
+{
+  "name": "purescript-halogen-memoryleak-repro",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-prelude": "^4.1.0",
+    "purescript-console": "^4.2.0",
+    "purescript-effect": "^2.0.0",
+    "purescript-halogen": "e51eee0afd4f9816a64242f9c4a7b67ffc157e7b"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^4.0.0"
+  }
+}
