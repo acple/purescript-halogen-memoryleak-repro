@@ -24,6 +24,7 @@ type Slot = (child :: ChildSlot Int)
 _child = SProxy :: SProxy "child"
 
 ----------------------------------------------------------------
+
 component :: H.Component HH.HTML Query Unit Void Aff
 component =
   H.component
@@ -38,7 +39,8 @@ component =
   where
   render s =
     HH.div_
-      [ HH.slot _child (s `mod` 3) child s absurd ]
+      [ HH.slot _child 1 child s absurd ]
+      -- [ HH.p_ [ HH.text $ show s ] ] -- without child component is ok
 
   eval :: Query ~> H.HalogenM State Query Slot Void Aff
   eval = case _ of
@@ -55,6 +57,14 @@ component =
     -- Loop next -> forever do
     --   liftAff $ delay (Milliseconds 30.0)
     --   eval $ H.action Increment
+
+    -- -- -- external loop
+    -- Loop next -> next <$ loop
+    --   where
+    --   loop = do
+    --     liftAff $ delay (Milliseconds 30.0)
+    --     modify_ (_ + 1)
+    --     loop
 
 ----------------------------------------------------------------
 
