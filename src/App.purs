@@ -39,7 +39,7 @@ component =
   where
   render s =
     HH.div_
-      [ HH.slot _child 1 child s absurd ]
+      [ HH.slot _child (s `mod` 3) child s absurd ]
       -- [ HH.p_ [ HH.text $ show s ] ] -- without child component is ok
 
   eval :: Query ~> H.HalogenM State Query Slot Void Aff
