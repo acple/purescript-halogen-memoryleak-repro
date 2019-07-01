@@ -3,11 +3,11 @@ module App where
 import Prelude
 
 import Control.Monad.Rec.Class (forever)
-import Data.Const (Const(..))
+import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))
 import Effect.Aff (Aff, Milliseconds(..), delay)
-import Halogen (liftAff, modify_)
+import Halogen (defaultEval, liftAff, mkEval, modify_)
 import Halogen as H
 import Halogen.HTML as HH
 
@@ -15,9 +15,11 @@ import Halogen.HTML as HH
 
 type State = Int
 
-data Query a
-  = Increment a
-  | Loop a
+type Query = Const Void
+
+data Action
+  = Increment
+  | Loop
 
 type Slot = (child :: ChildSlot Int)
 
@@ -27,14 +29,13 @@ _child = SProxy :: SProxy "child"
 
 component :: H.Component HH.HTML Query Unit Void Aff
 component =
-  H.component
+  H.mkComponent
     { initialState: const 0
     , render
-    , eval
-    , receiver: const Nothing
-    , initializer: Just $ H.action Loop -- loop on Query
-    -- , initializer: Nothing
-    , finalizer: Nothing
+    , eval: mkEval defaultEval
+        { handleAction = action
+        , initialize = Just Loop -- loop on Query
+        }
     }
   where
   render s =
@@ -42,29 +43,14 @@ component =
       [ HH.slot _child (s `mod` 3) child s absurd ]
       -- [ HH.p_ [ HH.text $ show s ] ] -- without child component is ok
 
-  eval :: Query ~> H.HalogenM State Query Slot Void Aff
-  eval = case _ of
-    Increment next -> do
+  action :: Action -> H.HalogenM State Action Slot Void Aff Unit
+  action = case _ of
+    Increment -> do
       modify_ (_ + 1)
-      pure next
 
-    -- simple recursion
-    Loop next -> do
+    Loop -> forever do
       liftAff $ delay (Milliseconds 30.0)
-      eval <<< Loop <=< eval <<< Increment $ next
-
-    -- -- MonadRec
-    -- Loop next -> forever do
-    --   liftAff $ delay (Milliseconds 30.0)
-    --   eval $ H.action Increment
-
-    -- -- -- external loop
-    -- Loop next -> next <$ loop
-    --   where
-    --   loop = do
-    --     liftAff $ delay (Milliseconds 30.0)
-    --     modify_ (_ + 1)
-    --     loop
+      action Increment
 
 ----------------------------------------------------------------
 
@@ -76,18 +62,12 @@ type ChildSlot = H.Slot CQuery Void
 
 child :: H.Component HH.HTML CQuery State Void Aff
 child =
-  H.component
+  H.mkComponent
     { initialState: identity
     , render
-    , eval
-    , receiver: const Nothing
-    , initializer: Nothing
-    , finalizer: Nothing
+    , eval: mkEval defaultEval
     }
   where
   render s =
     HH.p_
       [ HH.text $ show s ]
-
-  eval :: CQuery ~> H.HalogenM State CQuery () Void Aff
-  eval = case _ of Const void -> absurd void

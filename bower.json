@@ -10,7 +10,7 @@
     "purescript-prelude": "^4.1.0",
     "purescript-console": "^4.2.0",
     "purescript-effect": "^2.0.0",
-    "purescript-halogen": "8b7ca52cc19de4d6f591a5ce87b03473efa57e7b"
+    "purescript-halogen": "^5.0.0-rc.5"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0"
